@@ -9,7 +9,10 @@ export default function Sidebar({ role }) {
       { path: "/student/leaderboard", label: "Leaderboard" },
       { path: "/student/profile", label: "Profile" },
     ],
-    teacher: [{ path: "/teacher", label: "Dashboard" }],
+    teacher : [
+      { path : "/teacher", label : "Dashboard" },
+      { path : "/teacher/dummy", label : "Dummy" }
+    ],
     admin: [
       { path: "/admin", label: "Dashboard" },
     ],
