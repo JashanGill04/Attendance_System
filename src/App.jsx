@@ -6,10 +6,14 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Leaderboard from "./pages/Student/Leaderboards";
 import Profile from "./pages/Student/Profile";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   return (
-    <Routes>
+
+
+    <ThemeProvider>
+      <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
       <Route path="/teacher" element={<TeacherDashboard />} />
@@ -21,7 +25,9 @@ function App() {
         <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
-  );
+
+    </ThemeProvider>
+      );
 }
 
 export default App;

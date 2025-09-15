@@ -3,25 +3,29 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 
 export default function DashboardLayout({ role, title, children, user }) {
-  // Using more descriptive state names
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Default to open for desktop
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar: Renders only if isSidebarOpen is true */}
-      {isSidebarOpen && <Sidebar role={role} />}
-      
+    <div className="flex h-screen bg-gray-900">
+      {/* Sidebar: Now using a more responsive approach */}
+      <div
+        className={`transition-all duration-300 ${
+          isSidebarOpen ? "w-64" : "w-0"
+        } overflow-hidden`}
+      >
+        <Sidebar role={role} />
+      </div>
+
       {/* Main area */}
-      <div className="flex-1 flex flex-col bg-gray-100">
+      <div className="flex-1 flex flex-col">
         {/* Topbar */}
-        <Topbar 
-          title={title} 
-          user={user} 
-          isSidebarOpen={isSidebarOpen} 
+        <Topbar
+          title={title}
+          user={user}
           setIsSidebarOpen={setIsSidebarOpen}
         />
         {/* Scrollable content */}
-        <main className="p-6 overflow-auto">{children}</main>
+        <main className="flex-1  overflow-y-auto">{children}</main>
       </div>
     </div>
   );

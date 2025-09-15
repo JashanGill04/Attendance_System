@@ -1,117 +1,170 @@
+import React, { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+
 import DashboardLayout from "../../layouts/DashboardLayout";
+import StatCard from "../../components/StudentsDashboard/Statcard";
+import MarkAttendanceCard from "../../components/StudentsDashboard/Camera_Scan/MarkAttendanceCard";
+import SubjectDetails from "../../components/StudentsDashboard/Subject/SubjectDetails";
+import LeaveApplicationCard from "../../components/StudentsDashboard/Leave_Application/LeaveApplicationCard"; 
+import LeaveApplicationModal from "../../components/StudentsDashboard/Leave_Application/LeaveApplicationModal";
 
-export default function StudentDashboard() {
-  // Dummy data
-  const attendanceHistory = [
-    { date: "2025-09-09", status: "Present" },
-    { date: "2025-09-10", status: "Absent" },
-    { date: "2025-09-11", status: "Present" },
-    { date: "2025-09-12", status: "Present" },
-    { date: "2025-09-13", status: "Present" },
-  ];
 
-  const leaderboard = [
-    { name: "Jashan", points: 96 },
-    { name: "Harshit", points: 95 },
-    { name: "Namish", points: 85 },
-    { name: "Bhawik", points: 82 },
-    { name: "LingLong", points: 80 },
-  ];
+export default function Dashboard() {
+  const [popupMessage, setPopupMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false); // State for the modal
 
-  const streak = 5;
-  const attendancePercent = 87;
+  // -- Animation Variants --
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 },
+  };
+
+  // --- Dummy Data ---
+  const studentData = {
+    name: "John Doe",
+    streak: 3,
+    badges: ["Consistent", "On-time"],
+    attendance: {
+      Math: [
+        { date: "2025-09-01", status: 1 },
+        { date: "2025-09-02", status: 1 },
+        { date: "2025-09-03", status: 0 },
+        { date: "2025-09-04", status: 0 },
+        { date: "2025-09-05", status: 1 },
+        { date: "2025-09-06", status: 0 },
+        { date: "2025-09-07", status: 1 },
+        { date: "2025-09-08", status: 1 },
+
+      ],
+      Physics: [
+        { date: "2025-09-01", status: 1 },
+        { date: "2025-09-02", status: 1 },
+        { date: "2025-09-03", status: 0 },
+        { date: "2025-09-04", status: 0 },
+        { date: "2025-09-05", status: 1 },
+        { date: "2025-09-06", status: 0 },
+        { date: "2025-09-07", status: 1 },
+      ],
+      Chemistry: [
+        { date: "2025-09-01", status: 1 },
+        { date: "2025-09-02", status: 1 },
+        { date: "2025-09-03", status: 0 },
+        { date: "2025-09-04", status: 1 },
+        { date: "2025-09-05", status: 1 },
+        { date: "2025-09-06", status: 0 },
+        { date: "2025-09-07", status: 1 },
+      ],
+    },
+  };
+
+  // --- Calculations ---
+  // const overallPercentage = useMemo(() => {
+  //   const allRecords = Object.values(studentData.attendance).flat();
+  //   const total = allRecords.length;
+  //   if (total === 0) return 0;
+  //   const present = allRecords.filter((d) => d.status === 1).length;
+  //   return Math.round((present / total) * 100);
+  // }, [studentData.attendance]);
+
+  const lowAttendanceSubjects = useMemo(
+    () =>
+      Object.keys(studentData.attendance).filter((sub) => {
+        const records = studentData.attendance[sub];
+        if (records.length === 0) return false;
+        const present = records.filter((d) => d.status === 1).length;
+        return (present / records.length) * 100 < 75;
+      }),
+    [studentData.attendance]
+  );
+
+  // --- API HANDLER ---
+  const handleFaceScan = async () => {
+    setIsLoading(true);
+    setPopupMessage("Checking location...");
+  };
 
   return (
-    <DashboardLayout role="student" title="Student Dashboard">
-      {/* Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Today’s Attendance */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-semibold">Today’s Attendance</h3>
-          <p className="mt-4 text-green-600 font-bold text-2xl">✅ Present</p>
-        </div>
+    <DashboardLayout
+      role="student"
+      title="Student Dashboard"
+      user={studentData.name}
+    >
 
-        {/* Attendance % */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-semibold">Attendance %</h3>
-          <div className="mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div
-                className="bg-blue-500 h-4 rounded-full"
-                style={{ width: `${attendancePercent}%` }}
-              ></div>
-            </div>
-            <p className="mt-2 text-blue-600 font-bold text-xl">
-              {attendancePercent}%
-            </p>
-          </div>
-        </div>
-
-        {/* Streak */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-semibold">Streak</h3>
-          <p className="mt-4 text-orange-600 font-bold text-2xl">
-            🔥 {streak} days
-          </p>
-          {streak >= 5 && (
-            <span className="mt-2 inline-block bg-yellow-300 text-yellow-800 px-2 py-1 rounded text-sm font-semibold">
-              ⭐ Consistency Badge
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Attendance History */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-4">Attendance History</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border-b p-2">Date</th>
-                <th className="border-b p-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attendanceHistory.map((record, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
-                  <td className="border-b p-2">{record.date}</td>
-                  <td
-                    className={`border-b p-2 font-medium ${
-                      record.status === "Present"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {record.status}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Top 3 Leaderboard Preview */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4">Top Performers</h3>
-        <ul>
-          {leaderboard.slice(0, 3).map((student, idx) => (
-            <li key={idx} className="flex justify-between py-1">
-              <span>
-                {idx === 0 ? "🥇" : idx === 1 ? "🥈" : "🥉"} {student.name}
-              </span>
-              <span className="font-bold text-blue-600">{student.points} pts</span>
-            </li>
-          ))}
-        </ul>
-        <a
-          href="/student/leaderboard"
-          className="text-blue-500 text-sm mt-2 inline-block"
+      <div className="h-screen bg-gray-50 dark:bg-gray-800">
+        <motion.div
+          className=" gap-6 flex w-full mx-auto p-20"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          View Full Leaderboard →
-        </a>
+          {/* == LEFT COLUMN == */}
+          <motion.div className="lg:col-span-1 w-1/2 space-y-6" variants={itemVariants}>
+            <MarkAttendanceCard
+              handleFaceScan={handleFaceScan}
+              isLoading={isLoading}
+              popupMessage={popupMessage}
+            />
+              </motion.div>
+
+{/*  gamifications 
+            <div className="grid grid-cols-2 gap-4">
+              <StatCard
+                title="Overall Attendance"
+                value={`${overallPercentage}%`}
+                icon={"📊"}
+              />
+              <StatCard
+                title="Daily Streak"
+                value={`${studentData.streak} Days`}
+                icon={"🔥"}
+              />
+            </div>
+            {studentData.badges.length > 0 && (
+              <StatCard
+                title="Badges Earned"
+                value={studentData.badges.join(", ")}
+                icon={"🏆"}
+              />
+            )} */}
+
+
+
+
+
+
+
+          {/* == RIGHT COLUMN == */}
+          <motion.div variants={itemVariants}
+          className=" flex flex-col dark:bg-gray-800 gap-7"
+          >
+             {/* Placed the LeaveApplicationCard here */}
+            <LeaveApplicationCard onApplyClick={() => setIsLeaveModalOpen(true)} />
+            <SubjectDetails
+              attendance={studentData.attendance}
+              lowAttendanceSubjects={lowAttendanceSubjects}
+            />
+
+           
+          </motion.div>
+        </motion.div>
       </div>
+      
+      {/* This part is correct! The modal is rendered at the end. */}
+      <LeaveApplicationModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+      />
     </DashboardLayout>
   );
 }
